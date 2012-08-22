@@ -6,7 +6,7 @@ TTworkbench Play designs a new approach for testing.
 
 Details to our TTworkbench Play Program can be found here
 
-http://www.testingtech.com/services/community_program/ttworkbench_play.php
+http://www.testingtech.com/services/ttworkbench_play.php
 
 If you would like to join this Program please contact play[at]testingtech.com.
 
