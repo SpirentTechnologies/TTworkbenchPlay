@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE campaignloader PUBLIC "-//TESTING TECH//DTD MLF//1.9" "mlf.dtd">
+<campaignloader>
+  <campaign Name="main.clf" Control="false">
+    <testadapter Name="com.testingtech.ttcn.tri.PluginTestAdapter" File="">
+      <description>configuration/taconfig.xml</description>
+    </testadapter>
+    <module Name="Parameters" File="ttcn3build/Parameters.jar" Package="generated_ttcn"/>
+    <module Name="HANDLE_Interface" File="ttcn3build/HANDLE_Interface.jar" Package="generated_ttcn"/>
+    <parameter Name="ACTIONS_TCP_PORT" Module="Parameters" ModuleOfTypeDecl="">
+      <description>The TCP server port for the Actions service. The Widget is calling ACTIONS to the TE on this port.</description>
+      <type>integer</type>
+      <value><![CDATA[<Values:integer type="integer" xmlns:Values="Values.xsd"><Values:value>5100</Values:value></Values:integer>]]></value>
+      <default><![CDATA[<Values:integer type="integer" xmlns:Values="Values.xsd"><Values:value>5100</Values:value></Values:integer>]]></default>
+      <presentation>
+        <plain/>
+      </presentation>
+    </parameter>
+    <parameter Name="EVENTS_TCP_PORT" Module="Parameters" ModuleOfTypeDecl="">
+      <description>The TCP client port on which the Widget started it&apos;s EVENTS service. The TE connects to it as a client.</description>
+      <type>integer</type>
+      <value><![CDATA[<Values:integer type="integer" xmlns:Values="Values.xsd"><Values:value>5101</Values:value></Values:integer>]]></value>
+      <default><![CDATA[<Values:integer type="integer" xmlns:Values="Values.xsd"><Values:value>5101</Values:value></Values:integer>]]></default>
+      <presentation>
+        <plain/>
+      </presentation>
+    </parameter>
+    <testcase Name="TESTCASE" Alias="" Module="HANDLE_Interface" Retries="0" Runs="1" ActionOnFail="continue" Selection="false" Status="stopped" Verdict="fail">
+      <description></description>
+    </testcase>
+  </campaign>
+</campaignloader>

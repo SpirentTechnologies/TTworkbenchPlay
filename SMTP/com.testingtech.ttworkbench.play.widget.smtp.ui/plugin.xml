@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.testingtech.ttworkbench.play.dashboard.widget">
+      <widget
+            class="com.testingtech.ttworkbench.play.widget.smtp.ui.SMTPWidgetFactory"
+            clf="configuration/main.clf"
+            description="With this Widget Send you will be able to send E-Mails via SMTP. Existing mail server account is mandatory."
+            icon="icons/widget.png"
+            name="Send E-Mail (SMTP)"
+            runtime-plugin="com.testingtech.ttworkbench.play.widget.smtp.rt">
+      </widget>
+   </extension>
+
+</plugin>

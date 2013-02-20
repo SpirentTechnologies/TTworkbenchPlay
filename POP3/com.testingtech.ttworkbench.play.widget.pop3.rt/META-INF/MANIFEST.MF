@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundle-name
+Bundle-Vendor: %bundle-vendor
+Bundle-Localization: plugin
+Bundle-SymbolicName: com.testingtech.ttworkbench.play.widget.pop3.rt
+Bundle-Version: 1.0.0
+Require-Bundle: com.testingtech.tools,
+ com.testingtech.ttworkbench.pop3.rt
+Export-Package: com.testingtech.ttworkbench.play.generated
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

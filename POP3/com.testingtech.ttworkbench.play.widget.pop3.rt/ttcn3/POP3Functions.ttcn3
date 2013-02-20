@@ -1,0 +1,301 @@
+/*
+ * ----------------------------------------------------------------------------
+ *  (C) Copyright Testing Technologies, 2012-2013.  All Rights Reserved.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *     Testing Technologies - initial API and implementation
+ *
+ *  All copies of this program, whether in whole or in part, and whether
+ *  modified or not, must display this and all other embedded copyright
+ *  and ownership notices in full.
+ *
+ *  See the file COPYRIGHT for details of redistribution and use.
+ *
+ *  You should have received a copy of the COPYRIGHT file along with
+ *  this file; if not, write to the Testing Technologies,
+ *  Michaelkirchstr. 17/18, 10179 Berlin, Germany.
+ *
+ *  TESTING TECHNOLOGIES DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+ *  SOFTWARE. IN NO EVENT SHALL TESTING TECHNOLOGIES BE LIABLE FOR ANY
+ *  SPECIAL, DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+ *  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ *  ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+ *  THIS SOFTWARE.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ *  EITHER EXPRESSED OR IMPLIED, INCLUDING ANY KIND OF IMPLIED OR
+ *  EXPRESSED WARRANTY OF NON-INFRINGEMENT OR THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * -----------------------------------------------------------------------------
+ */
+module POP3Functions {
+	import from POP3Aux all;
+	import from AuxTypes all;
+
+    /**
+    * @desc POP3 Server Name
+    */
+    modulepar charstring server := "testmailserver";
+    /**
+    * @desc The user name necessary to log in to POP3 server
+    */
+    modulepar charstring user := "ttworkbench@example.com";
+    /**
+    * @desc The password necessary to log in to POP3 server
+    */
+    modulepar charstring passw := "test12345";
+    /**
+    * @desc The POP3 port number
+    */
+    modulepar integer portNr := 110;
+    /**
+    * @desc
+    *     The shared secret which produces the MD5 digest when combined with
+    *     the timestamp.
+    */
+    modulepar charstring secret := "";
+    
+    /**
+    * @desc The number of lines from the e-mail to be listed
+    */
+    modulepar integer numLines := 2;
+    /**
+    * @desc
+    *     deleteMessageFromServer set on true will remove the emails from the
+    *     server after retrieving them
+    */
+    modulepar boolean deleteMessageFromServer := false;
+    /**
+    * @desc timer for handling the connection
+    */
+    modulepar float callTimeout := 5.0;
+    
+	function postamble() runs on POP3ComponentType {
+		if (logged_in) {
+			f_logout();
+		}
+		if (connected) {
+			f_disconnect();
+		}
+
+	}
+	// defines a message based port which allows to exchange 
+	// values without a restriction
+	// defines a component type that will used later as mtc
+	type component POP3ComponentType {
+		port POP3Port pop3;
+		var boolean logged_in := false;
+		var boolean connected := false;
+	}
+
+	// defines a component type that will used later as system    
+	type component systemType {
+		port POP3Port pop3;
+	}
+
+    function f_connect(charstring p_host, integer p_portNr)
+    runs on POP3ComponentType {
+        // connect to the remote host
+        var POP3Exception errorResponse;
+        pop3.call(TCPConnectInetAddress:{p_host, p_portNr}, callTimeout) {
+            [] pop3.getreply(TCPConnectInetAddress:{server, portNr}) {
+                setverdict(pass);
+                connected := true;
+            }
+            [] pop3.catch(TCPConnectInetAddress, TCPUDPConnectionException:?) ->
+               value errorResponse {
+                setverdict(fail);
+                postamble();
+            }
+            [] pop3.catch(timeout) {
+                setverdict(inconc);
+                postamble();
+            }
+        };
+    }
+
+
+	function f_login(
+		charstring p_user,
+		charstring p_passw,
+		charstring p_secret) runs on POP3ComponentType {
+		var POP3Exception errorResponse;
+		pop3.call (POP3Login: {
+			p_user, p_passw, p_secret
+		}, callTimeout) {
+			[] pop3.getreply (POP3Login: {
+				user, passw, secret
+			}) {
+				setverdict (pass);
+				logged_in := true;
+			}
+			[] pop3.catch (
+				POP3Login,
+				POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+	}
+
+	function f_listMessages() runs on POP3ComponentType return POP3MessageInfoArray {
+		var POP3Exception errorResponse;
+		var POP3MessageInfoArray messageArray;
+		
+		pop3.call (POP3ListMessages: {}, callTimeout) {
+			
+			[] pop3.getreply (POP3ListMessages: {}) -> value messageArray {
+				setverdict (pass);
+				return messageArray;
+	
+			}
+			[] pop3.catch (POP3ListMessages, POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+		return {};
+	}
+
+	function f_retrieveMessageTop(
+		integer p_messageId,
+		integer p_numLines,
+		out template(omit) POP3Exception errorResponse) runs on POP3ComponentType return template(omit) charstring {
+
+		var template(omit) charstring messageResponse := omit;
+		errorResponse := omit;
+
+		pop3.call (POP3RetrieveMessageTop: {
+			p_messageId, p_numLines
+		}, callTimeout) {
+			[] pop3.getreply (POP3RetrieveMessageTop: {
+				p_messageId, p_numLines
+			}) -> value messageResponse {
+				setverdict (pass);
+				return messageResponse;
+			}
+			[] pop3.catch (
+				POP3RetrieveMessageTop,
+				POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+				return "Error:" & errorResponse
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+        return "Error:timeout occurred";
+	}
+
+	function f_retrieveMessage(integer p_messageId,
+		out template(omit) POP3Exception errorResponse) runs on POP3ComponentType return template(omit) charstring {
+
+        var template(omit) charstring messageResponse := omit;
+        errorResponse := omit;
+
+		pop3.call (POP3RetrieveMessage: {
+			p_messageId
+		}, callTimeout) {
+			[] pop3.getreply (POP3RetrieveMessage: {
+				p_messageId
+			}) -> value messageResponse {
+			    log("downloaded message #" & int2str(p_messageId) & ": " & messageResponse);
+				setverdict (pass);
+				return messageResponse;
+			}
+			[] pop3.catch (
+				POP3RetrieveMessage,
+				POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+                return "Error:" & errorResponse
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+        return "Error:timeout occurred";
+	}
+
+	function f_deleteMessage(integer p_messageId) runs on POP3ComponentType {
+		var POP3Exception errorResponse;
+		pop3.call (POP3DeleteMessage: {
+			p_messageId
+		}, callTimeout) {
+			[] pop3.getreply (POP3DeleteMessage: {
+				p_messageId
+			}) {
+				setverdict (pass);
+			}
+			[] pop3.catch (
+				POP3DeleteMessage,
+				POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+	}
+	function f_logout() runs on POP3ComponentType {
+		var POP3Exception errorResponse;
+		pop3.call (POP3Logout: {}, callTimeout) {
+			[] pop3.getreply (POP3Logout: {}) {
+				setverdict (pass);
+				logged_in := false;
+			}
+			[] pop3.catch (
+				POP3Logout,
+				POP3Exception: ?) -> value errorResponse {
+				setverdict (fail);
+				postamble();
+			}
+			[] pop3.catch (timeout) {
+				setverdict (inconc);
+				postamble();
+			}
+		}
+	}
+
+    function f_disconnect() runs on POP3ComponentType {
+        // close the connection
+        var POP3Exception errorResponse;
+        pop3.call(TCPDisconnect:{}, callTimeout) {
+            [] pop3.getreply(TCPDisconnect:{}) {
+                setverdict(pass);
+                connected := false;
+            }
+            [] pop3.getreply {
+                setverdict(fail);
+            }
+            // if error is received, then the verdict is set to fail
+            [] pop3.catch(TCPDisconnect, POP3Exception:?) ->
+               value errorResponse {
+                setverdict(fail);
+            }
+            [] pop3.catch(timeout) {
+                setverdict(inconc);
+            }
+        };
+    }
+
+}

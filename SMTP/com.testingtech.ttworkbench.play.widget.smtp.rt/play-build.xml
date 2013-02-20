@@ -1,0 +1,7 @@
+<project name="smtp.rt" default="build">
+  <property name="TTplugin-Play_build.dir"
+            location="../../TTplugin-Play_build"/>
+  <property name="module.id"
+            value="Interface"/>
+  <import file="${TTplugin-Play_build.dir}/play-library.xml"/>
+</project>

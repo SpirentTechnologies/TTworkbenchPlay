@@ -1,0 +1,77 @@
+package PROTO_Interface;
+option java_generic_services = true;
+option java_package = "com.testingtech.ttworkbench.play.generated";
+option java_outer_classname = "PROTO_Interface";
+
+message Connect {
+  required string server = 1;
+  required sint64 portNumber = 2;
+}
+
+message Disconnect {
+}
+
+message Login {
+  required string username = 1;
+  required string password = 2;
+  required string secret = 3;
+}
+
+message Logout {
+}
+
+message ListMessages {
+}
+
+message RetrieveMessage {
+  required sint64 messageId = 1;
+}
+
+message RetrieveMessageTop {
+  required sint64 messageId = 1;
+  required sint64 numberOfLines = 2;
+}
+
+message DeleteMessage {
+  required sint64 messageId = 1;
+}
+
+message Status {
+  required sint64 statusCode = 1;
+  required string statusMessage = 2;
+  required bool connected = 3;
+  required bool loggedIn = 4;
+}
+
+message POP3Message {
+  required sint64 messageId = 1;
+  required bool partialContent = 2;
+  required string rawContent = 3;
+}
+
+message DeleteMessageResponse {
+  required sint64 messageId = 1;
+}
+
+message Void {}
+
+service ACTIONS {
+  rpc Interface_Connect(PROTO_Interface.Connect) returns (Void);
+  rpc Interface_Disconnect(PROTO_Interface.Disconnect) returns (Void);
+  rpc Interface_Login(PROTO_Interface.Login) returns (Void);
+  rpc Interface_Logout(PROTO_Interface.Logout) returns (Void);
+  rpc Interface_ListMessages(PROTO_Interface.ListMessages) returns (Void);
+  rpc Interface_RetrieveMessage(PROTO_Interface.RetrieveMessage) returns (Void);
+  rpc Interface_RetrieveMessageTop(PROTO_Interface.RetrieveMessageTop) returns (Void);
+  rpc Interface_DeleteMessage(PROTO_Interface.DeleteMessage) returns (Void);
+}
+
+service EVENTS {
+  rpc Interface_Status(PROTO_Interface.Status) returns (Void);
+  rpc POP3Aux_POP3MessageInfoArray(PROTO_POP3Aux.POP3MessageInfoArray) returns (Void);
+  rpc Interface_POP3Message(PROTO_Interface.POP3Message) returns (Void);
+  rpc Interface_DeleteMessageResponse(PROTO_Interface.DeleteMessageResponse) returns (Void);
+}
+
+
+import "PROTO_POP3Aux.proto";

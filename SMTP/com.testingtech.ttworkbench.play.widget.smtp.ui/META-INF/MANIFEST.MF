@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %bundle-name
+Bundle-SymbolicName: com.testingtech.ttworkbench.play.widget.smtp.ui;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: com.testingtech.ttworkbench.play.widget.smtp.ui.Activator
+Bundle-Vendor: %bundle-vendor
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ com.testingtech.ttworkbench.core,
+ com.testingtech.ttworkbench.play.dashboard,
+ com.testingtech.ttworkbench.ttman.server.api,
+ com.testingtech.ttworkbench.play.widget.smtp.rt
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .

@@ -1,0 +1,69 @@
+package PROTO_Interface;
+option java_generic_services = true;
+option java_package = "com.testingtech.ttworkbench.play.generated";
+option java_outer_classname = "PROTO_Interface";
+
+message Connect {
+  required string server = 1;
+  required sint64 portNumber = 2;
+}
+
+message Disconnect {
+}
+
+message Login {
+  required string method = 1;
+  required string username = 2;
+  required string password = 3;
+}
+
+message Logout {
+}
+
+message SendMessage {
+  required string senderId = 1;
+  repeated string recipientIds = 2;
+  repeated string recipientCCIds = 3;
+  repeated string recipientBCCIds = 4;
+  required string subject = 5;
+  required string messageBody = 6;
+}
+
+message HeaderField {
+  required string fieldName = 1;
+  required string fieldValue = 2;
+}
+
+message SendMessageWithCustomHeaders {
+  repeated PROTO_Interface.HeaderField customHeaderFields = 1;
+  required string senderId = 2;
+  repeated string recipientIds = 3;
+  repeated string recipientCCIds = 4;
+  repeated string recipientBCCIds = 5;
+  required string subject = 6;
+  required string messageBody = 7;
+}
+
+message Status {
+  required sint64 statusCode = 1;
+  required string statusMessage = 2;
+  required bool connected = 3;
+  required bool loggedIn = 4;
+}
+
+message Void {}
+
+service ACTIONS {
+  rpc Interface_Connect(PROTO_Interface.Connect) returns (Void);
+  rpc Interface_Disconnect(PROTO_Interface.Disconnect) returns (Void);
+  rpc Interface_Login(PROTO_Interface.Login) returns (Void);
+  rpc Interface_Logout(PROTO_Interface.Logout) returns (Void);
+  rpc Interface_SendMessage(PROTO_Interface.SendMessage) returns (Void);
+  rpc Interface_SendMessageWithCustomHeaders(PROTO_Interface.SendMessageWithCustomHeaders) returns (Void);
+}
+
+service EVENTS {
+  rpc Interface_Status(PROTO_Interface.Status) returns (Void);
+}
+
+

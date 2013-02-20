@@ -1,0 +1,13 @@
+#Wed Feb 13 11:09:55 CET 2013
+compiler.enableProjectSettings=true
+compiler.javaCodeGenerationEnabled=true
+compiler.javaOutputDirectory=generated/java
+compiler.protocFilePath=${workspace_loc\:build-libraries}/bin/protoc
+compiler.refreshOutputDirectory=true
+compiler.refreshProject=false
+compiler.useProtocInCustomPath=true
+compiler.useProtocInSystemPath=false
+eclipse.preferences.version=1
+paths.directoryPaths=${workspace_loc\:/${project}/generated/ttcn3}
+paths.filesInMultipleDirectories=true
+paths.filesInOneDirectoryOnly=false

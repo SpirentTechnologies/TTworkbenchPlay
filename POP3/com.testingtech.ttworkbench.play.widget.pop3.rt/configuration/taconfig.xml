@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testadapter>
+  <codec encode="proto">
+    <plugin id="com.testingtech.ttcn.proto.ProtoRuntimePlugin">
+      <parameter id="class" value="com.testingtech.ttworkbench.proto.codec.runtime.ProtoCodecProvider"/>
+    </plugin>
+  </codec>
+  <codec encode="">
+    <plugin id="com.testingtech.ttcn.XTestAdapter.builtin.tci.codecs">
+      <parameter id="class" value="com.testingtech.ttcn.tci.codec.plugin.ValueStringCodecPluginProvider"/>
+    </plugin>
+    <parameter id="default" value="true"/>
+  </codec>
+  <port>
+    <plugin id="com.testingtech.ttworkbench.tt3rt.tcp.port.TcpPortPlugin">
+      <parameter id="class" value="com.testingtech.ttworkbench.tt3rt.tcp.port.TcpPortPluginProvider"/>
+    </plugin>
+    <parameter id="taParams">
+      <parameter id="TCP_MODE">
+        <value>
+          <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+            <Values:value>mixed</Values:value>
+          </Values:charstring>
+        </value>
+      </parameter>
+      <parameter id="TCP_LOCAL_HOST">
+        <value>
+          <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+            <Values:value>localhost</Values:value>
+          </Values:charstring>
+        </value>
+      </parameter>
+      <parameter id="TCP_LOCAL_PORT">
+        <value>
+          <Values:integer xmlns:Values="Values.xsd" type="integer">
+            <Values:value>5000</Values:value>
+          </Values:integer>
+        </value>
+      </parameter>
+      <parameter id="TCP_REMOTE_HOST">
+        <value>
+          <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+            <Values:value>localhost</Values:value>
+          </Values:charstring>
+        </value>
+      </parameter>
+      <parameter id="TCP_REMOTE_PORT">
+        <value>
+          <Values:integer xmlns:Values="Values.xsd" type="integer">
+            <Values:value>5000</Values:value>
+          </Values:integer>
+        </value>
+      </parameter>
+      <parameter id="EVENTS_PORT_POP3">
+        <parameter id="TCP_MODE">
+          <value>
+            <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value>client</Values:value>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_LOCAL_HOST">
+          <value>
+            <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value/>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_LOCAL_PORT">
+          <value>
+            <Values:integer xmlns:Values="Values.xsd" type="integer">
+              <Values:value>0</Values:value>
+            </Values:integer>
+          </value>
+        </parameter>
+        <parameter id="TCP_REMOTE_HOST">
+          <value>
+            <Values:charstring name="" type="charstring">
+              <Values:value>localhost</Values:value>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_REMOTE_PORT" value="${Parameters.EVENTS_TCP_PORT}"/>
+      </parameter>
+      <parameter id="ACTIONS_PORT_POP3">
+        <parameter id="TCP_MODE">
+          <value>
+            <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value>server</Values:value>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_LOCAL_HOST">
+          <value>
+            <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value>localhost</Values:value>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_LOCAL_PORT" value="${Parameters.ACTIONS_TCP_PORT}"/>
+        <parameter id="TCP_REMOTE_HOST">
+          <value>
+            <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value/>
+            </Values:charstring>
+          </value>
+        </parameter>
+        <parameter id="TCP_REMOTE_PORT">
+          <value>
+            <Values:integer xmlns:Values="Values.xsd" type="integer">
+              <Values:value>-1</Values:value>
+            </Values:integer>
+          </value>
+        </parameter>
+      </parameter>
+    </parameter>
+    <parameter id="portType" value="CONFIG_Interface.PROTO_EVENTS_POP3"/>
+    <parameter id="portType" value="CONFIG_Interface.PROTO_ACTIONS_POP3"/>
+    <parameter id="portFilters">
+      <parameter id="portFilter">
+        <parameter id="pluginId" value="com.testingtech.ttcn.proto.ProtoRuntimePlugin"/>
+        <parameter id="class" value="com.testingtech.ttworkbench.proto.filter.ProtobufRpcMessageSplitterFilterProvider"/>
+      </parameter>
+      <parameter id="portFilter">
+        <parameter id="pluginId" value="com.testingtech.ttcn.proto.ProtoRuntimePlugin"/>
+        <parameter id="class" value="com.testingtech.ttworkbench.proto.filter.socketrpc.SocketRPCProtoServiceFilterProvider"/>
+      </parameter>
+    </parameter>
+  </port>
+  <port>
+    <plugin id="com.testingtech.tt3rt.pop3.pop3RuntimePlugin">
+      <parameter id="class" value="com.testingtech.ttworkbench.tt3rt.pop3.port.POP3PortProvider"/>
+    </plugin>
+    <parameter id="taParams">
+      <parameter id="POP3_ENCODING_NAME">
+        <value>
+          <Values:charstring xmlns:Values="Values.xsd" type="charstring">
+              <Values:value>valueStringCodec</Values:value>
+            </Values:charstring>
+        </value>
+      </parameter>
+    </parameter>
+    <parameter id="portType" value="POP3Aux.POP3Port"/>
+  </port>
+</testadapter>

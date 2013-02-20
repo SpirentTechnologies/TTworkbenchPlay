@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.testingtech.ttworkbench.play.dashboard.widget">
+      <widget
+            class="com.testingtech.ttworkbench.play.widget.pop3.ui.POP3WidgetFactory"
+            clf="configuration/main.clf"
+            description="With this Widget gets the E-Mails via POP3. Existing mail server account is mandatory."
+            icon="icons/widget.png"
+            name="Check E-Mail (POP3)"
+            runtime-plugin="com.testingtech.ttworkbench.play.widget.pop3.rt">
+      </widget>
+   </extension>
+
+</plugin>

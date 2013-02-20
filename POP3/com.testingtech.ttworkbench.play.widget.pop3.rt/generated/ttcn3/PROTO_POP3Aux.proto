@@ -1,0 +1,15 @@
+package PROTO_POP3Aux;
+option java_generic_services = true;
+option java_package = "com.testingtech.ttworkbench.play.generated";
+option java_outer_classname = "PROTO_POP3Aux";
+
+message POP3MessageInfo {
+  required string identifier = 1;
+  required sint64 number = 2;
+  required sint64 size = 3;
+}
+
+message POP3MessageInfoArray {
+  repeated PROTO_POP3Aux.POP3MessageInfo elements = 1;
+}
+

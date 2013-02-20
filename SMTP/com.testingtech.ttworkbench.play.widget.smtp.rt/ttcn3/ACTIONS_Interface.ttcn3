@@ -1,0 +1,134 @@
+/*
+ * ----------------------------------------------------------------------------
+ *  (C) Copyright Testing Technologies, 2012-2013.  All Rights Reserved.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *     Testing Technologies - initial API and implementation
+ *
+ *  All copies of this program, whether in whole or in part, and whether
+ *  modified or not, must display this and all other embedded copyright
+ *  and ownership notices in full.
+ *
+ *  See the file COPYRIGHT for details of redistribution and use.
+ *
+ *  You should have received a copy of the COPYRIGHT file along with
+ *  this file; if not, write to the Testing Technologies,
+ *  Michaelkirchstr. 17/18, 10179 Berlin, Germany.
+ *
+ *  TESTING TECHNOLOGIES DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+ *  SOFTWARE. IN NO EVENT SHALL TESTING TECHNOLOGIES BE LIABLE FOR ANY
+ *  SPECIAL, DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+ *  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ *  ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+ *  THIS SOFTWARE.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ *  EITHER EXPRESSED OR IMPLIED, INCLUDING ANY KIND OF IMPLIED OR
+ *  EXPRESSED WARRANTY OF NON-INFRINGEMENT OR THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * -----------------------------------------------------------------------------
+ */
+module ACTIONS_Interface {
+  import from CONFIG_Interface all;
+  import from EVENTS_Interface all;
+  import from SMTPFunctions all;
+  import from Interface all;
+
+  function ACTION_Interface__Connect(Interface.Connect p_value) runs on COMPONENT {
+    log("ACTION_Interface__Connect was called by the widget");
+
+    f_connect(server, portNr);
+    if (connected) {
+	    EVENT_Interface__Status(okStatus());
+    } else {
+        EVENT_Interface__Status(errorStatus(500, "no connection"));
+    }
+  }
+
+  function ACTION_Interface__Disconnect(Interface.Disconnect p_value) runs on COMPONENT {
+    log("ACTION_Interface__Disconnect was called by the widget");
+    f_disconnect();
+    EVENT_Interface__Status(okStatus());
+  }
+
+  function ACTION_Interface__Login(Interface.Login p_value) runs on COMPONENT {
+    log("ACTION_Interface__Login was called by the widget");
+    if (not(connected)) {
+        EVENT_Interface__Status(errorStatus(500, "no connection"));
+        return;
+    }
+    f_login(hostname);
+    if (logged_in) {
+	    EVENT_Interface__Status(okStatus());
+    } else {
+        EVENT_Interface__Status(errorStatus(500, "user not logged in"));
+    }
+  }
+
+  function ACTION_Interface__Logout(Interface.Logout p_value) runs on COMPONENT {
+    log("ACTION_Interface__Logout was called by the widget");
+    f_logout();
+    EVENT_Interface__Status(okStatus());
+  }
+
+  function ACTION_Interface__SendMessage(Interface.SendMessage p_value) runs on COMPONENT {
+    // TODO to be implemented
+    var charstring header;
+    log("ACTION_Interface__SendMessage was called by the widget");
+
+    // set the sender, this must be done before adding any recepient
+    f_setSenderString(senderId);
+
+    // adding recipients
+    for (var integer i:=0; i<sizeof(recipients); i:=i + 1) {
+        f_addRecipientString(recipients[i]);
+    }
+
+    header:= f_smtpHeader(senderId, recipients, subject, cc, headerField, headerValue);
+    f_sendShortMessageData(header & shortMessage);
+//	f_sendSimpleMessageRecipient(senderId, recipient, header & longMessageMsg);
+//	f_SendSimpleMessageRecipients(senderId, recipients, header& longMessageMsg);
+  }
+
+  function ACTION_Interface__SendMessageWithCustomHeaders(Interface.SendMessageWithCustomHeaders p_value) runs on COMPONENT {
+    // TODO to be implemented
+    log("ACTION_Interface__SendMessageWithCustomHeaders was called by the widget");
+  }
+
+  function PREAMBLE() runs on COMPONENT {
+    map (mtc: smtp, system: smtp);
+
+    map(mtc:ACTIONS_PORT_SMTP, system:ACTIONS_PORT_SMTP);
+    map(mtc:EVENTS_PORT_SMTP, system:EVENTS_PORT_SMTP);
+  }
+
+  function POSTAMBLE() runs on COMPONENT {
+    unmap(mtc:ACTIONS_PORT_SMTP, system:ACTIONS_PORT_SMTP);
+    unmap(mtc:EVENTS_PORT_SMTP, system:EVENTS_PORT_SMTP);
+    deactivate;
+
+    postamble();
+    unmap (mtc: smtp, system: smtp);
+  }
+
+  // utility functions
+  
+    function okStatus() runs on COMPONENT return Status {
+        return Status:{statusCode := 0,
+            statusMessage := "",
+            connected := connected,
+            loggedIn := logged_in};
+    }
+    function errorStatus(integer p_statusCode, charstring p_statusMessage) runs on COMPONENT return Status {
+        return Status:{statusCode := p_statusCode,
+            statusMessage := p_statusMessage,
+            connected := connected,
+            loggedIn := logged_in};
+    }
+}

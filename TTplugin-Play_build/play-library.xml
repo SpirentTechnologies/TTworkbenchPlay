@@ -1,0 +1,143 @@
+<project name="play-library">
+  <dirname property="play-library.dir"
+           file="${ant.file.play-library}"/>
+    
+  <taskdef resource="net/sf/antcontrib/antlib.xml">
+    <classpath>
+      <pathelement location="${play-library.dir}/lib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
+
+  <fail message="Property 'module.id' is not set!">
+    <condition>
+      <not>
+        <isset property="module.id"/>
+      </not>
+    </condition>
+  </fail>
+
+  <tstamp>
+    <format property="build.id.detailed" pattern="yyyy.MM.dd.HH.mm.ss.SSS"/>
+  </tstamp>
+
+  <!-- customBuildCallbacks targets -->
+  <target name="pre.build.jars"
+          depends="build"/>
+  <target name="post.clean"
+          depends="clean"/>
+    
+  <target name="clean">
+    <echo>Cleaning Play files...</echo>
+    <delete includeemptydirs="true"
+            failonerror="false">
+      <fileset dir="${basedir}/generated/java"
+               includes="**/*"
+               excludes=".cvsignore"/>
+      <fileset dir="${basedir}/generated/ttcn3"
+               includes="*.ttcn3view"/>
+      <fileset dir="${basedir}/ttcn3build"
+               includes="**/*"/>
+    </delete>
+    <eclipse.refreshLocal resource="${project.name}"
+                          depth="infinite"/>                        
+  </target>  
+        
+  <target name="build">
+    <mkdir dir="${basedir}/generated/java"/>
+    <mkdir dir="${basedir}/ttcn3build"/>
+    <if>
+      <outofdate>
+        <targetfiles>
+          <fileset dir="${basedir}/ttcn3build"
+                   includes="*.jar"/>
+          <fileset dir="${basedir}/generated/ttcn3"
+                   includes="*.ttcn3view"/>
+          <fileset dir="${basedir}/generated/java"
+                   includes="**/*.java"/>
+        </targetfiles>
+        <sourcefiles>
+          <fileset dir="${basedir}/generated/ttcn3"
+                   includes="*.ttcn3,*.proto"/>
+        </sourcefiles>
+      </outofdate>
+      <then>
+        <!-- preparing proto executable -->
+        <if>
+          <os family="windows" />
+          <then>
+            <property name="protoc.executable"
+                      value="${play-library.dir}/bin/protoc.exe"/>
+          </then>
+          <else>
+            <if>         
+              <os family="mac" />
+              <then>
+                <property name="protoc.executable"
+                          value="${play-library.dir}/bin/protoc_macosx"/>
+              </then>
+              <else>
+                <property name="protoc.executable"
+                          value="${play-library.dir}/bin/protoc"/>
+              </else>
+            </if>
+            <chmod perm="u+x">
+              <fileset dir="${play-library.dir}/bin"
+                       includes="protoc,protoc_macosx"/>
+            </chmod>
+          </else>
+        </if>
+        <!-- Generating Java from Proto -->
+        <pathconvert property="proto-files"
+                     pathsep=" ">
+          <fileset dir="${basedir}/generated/ttcn3/"
+                   includes="*.proto"/>
+          <map from="${basedir}/"
+               to=""/>
+        </pathconvert>
+        <exec executable="${protoc.executable}"
+              dir="${basedir}"
+              failonerror="true"
+              failifexecutionfails="true">
+          <arg line="--java_out=generated${file.separator}java" />
+          <arg line="--proto_path=generated${file.separator}ttcn3" />
+          <arg line="${proto-files}" />
+        </exec>
+      
+        <pathconvert property="ttwb.path.tt3plugins.local">
+          <path id="ttwb.path.tt3plugins.pathref">
+            <dirset dir="${basedir}/.."
+                    includes="*/tt3plugins"/>
+          </path>
+        </pathconvert>
+        <property name="ttwb.path.tt3plugins.combined"
+                  value="${ttwb.path.tt3plugins.local}${path.separator}${ttwb.path.tt3plugins}"/>
+
+        <!-- Compiling generated TTCN-3 -->
+        <java classname="de.tu_berlin.cs.uebb.ttcn.compiler.CompilerMain"
+              fork="true"
+              failonerror="true"
+              maxmemory="1024m">
+          <arg line="-D --log -S ${build.id.detailed}"/>
+          <arg line="-P &quot;${basedir}/ttcn3${path.separator}${basedir}/generated/ttcn3&quot;"/>
+          <arg line="-d &quot;${basedir}/ttcn3build&quot;"/>
+          <arg line="--plugin-dir &quot;${ttwb.path.tt3plugins.combined}&quot;"/>
+          <arg line="--license-file &quot;${eclipse.home}/license.dat&quot;"/>
+          <arg line="-R &quot;${ttwb.classpath.generated-ttcn}&quot;"/>
+          <arg line="-C internal-javac"/>
+          <arg line="HANDLE_${module.id}"/>
+          <classpath>
+            <pathelement path="${ttwb.classpath.compiler}"/>
+          </classpath>
+        </java>
+        <!-- refreshing the project -->
+        <basename property="project.name"
+                  file="${basedir}"/>
+        <eclipse.refreshLocal resource="${project.name}"
+                              depth="infinite"/>                        
+      </then>
+      <else>
+        <echo message="Generated Play files for ${module.id}.ttcn3 are up-to-date!"/>
+      </else>
+    </if>
+  </target>
+</project>

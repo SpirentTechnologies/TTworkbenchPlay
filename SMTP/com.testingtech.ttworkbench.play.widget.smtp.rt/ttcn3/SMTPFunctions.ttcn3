@@ -1,0 +1,406 @@
+/*
+ * ----------------------------------------------------------------------------
+ *  (C) Copyright Testing Technologies, 2012-2013.  All Rights Reserved.
+ *
+ *  All rights reserved. This program and the accompanying materials
+ *  are made available under the terms of the Eclipse Public License v1.0
+ *  which accompanies this distribution, and is available at
+ *  http://www.eclipse.org/legal/epl-v10.html
+ *
+ *  Contributors:
+ *     Testing Technologies - initial API and implementation
+ *
+ *  All copies of this program, whether in whole or in part, and whether
+ *  modified or not, must display this and all other embedded copyright
+ *  and ownership notices in full.
+ *
+ *  See the file COPYRIGHT for details of redistribution and use.
+ *
+ *  You should have received a copy of the COPYRIGHT file along with
+ *  this file; if not, write to the Testing Technologies,
+ *  Michaelkirchstr. 17/18, 10179 Berlin, Germany.
+ *
+ *  TESTING TECHNOLOGIES DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+ *  SOFTWARE. IN NO EVENT SHALL TESTING TECHNOLOGIES BE LIABLE FOR ANY
+ *  SPECIAL, DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+ *  AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+ *  ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+ *  THIS SOFTWARE.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ *  EITHER EXPRESSED OR IMPLIED, INCLUDING ANY KIND OF IMPLIED OR
+ *  EXPRESSED WARRANTY OF NON-INFRINGEMENT OR THE IMPLIED WARRANTIES
+ *  OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ * -----------------------------------------------------------------------------
+ */
+module SMTPFunctions {
+    import from AuxTypes all;
+    import from SMTPAux all;
+
+	
+    /**
+    * @desc SMTP server
+    */
+    modulepar charstring server := "testmailserver" ;
+
+    /**
+    * @desc The SMTP port number
+    */
+    modulepar integer portNr := 25 ;
+
+	
+    /**
+    * @desc The sender e-mail address
+    */
+    modulepar charstring senderId := "ttworkbench@example.com";
+
+	
+    /**
+    * @desc The subject of the e-mail
+    */
+    modulepar charstring subject := "FYI: New test mail, please delete";
+	
+    /**
+    * @desc The header field of the e-mail, optional
+    */
+    modulepar charstring headerField := "TestingTechnologies";
+	
+    /**
+    * @desc The value of the header field if this is mentioned, else should be omit
+    */
+    modulepar charstring headerValue := "SMTPPortPlugin";
+	
+    /**
+    * @desc The message to be sent
+    */
+    modulepar charstring longMessageMsg :=
+    "This is the body of an e-mail sent with SMTPPortPlugin with SMTPHeader";
+	
+    /**
+    * @desc The body of a short message
+    */
+    modulepar charstring shortMessage := "This is a short message body sent with SMTPPortPlugin";
+
+    /**
+    * @desc The recipients e-mail addresses
+    */
+    modulepar StringArray recipients := {
+        "test1@example.com"
+    }
+
+    /**
+    * @desc The CC addresses
+    */
+    modulepar StringArray cc := {}
+
+    /**
+    * @desc timer for handling the connection
+    */
+    modulepar float callTimeout := 5.0;
+
+    // defines a component type that will used later as mtc
+    type component SMTPComponentType {
+        port SMTPPort smtp;
+        var boolean connected := false;
+        var boolean logged_in := false;
+        var charstring hostname := "localhost";
+    }
+
+    // defines a component type that will used later as system
+    type component SMTPSystemComponentType {
+        port SMTPPort smtp;
+    }
+
+    function postamble() runs on SMTPComponentType {
+        log ("Entering postamble");
+        if (logged_in) {
+            f_logout();
+        }
+        if (connected) {
+            f_disconnect();
+        }
+        stop;
+    }
+
+    function f_connect(
+        charstring p_hostname,
+        integer p_portNr) runs on SMTPComponentType {
+
+        var SMTPException errorResponse;
+        hostname := p_hostname;
+        smtp.call (TCPConnectInetAddress: {
+                p_hostname, p_portNr
+            }, callTimeout) {
+            [] smtp.getreply (TCPConnectInetAddress: {
+                    p_hostname, p_portNr
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                TCPConnectInetAddress,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+    function f_isConnected() runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (TCPIsConnected: {}, callTimeout) {
+            [] smtp.getreply (TCPIsConnected: {}) {
+                connected := true;
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                TCPIsConnected,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+
+    function f_login(charstring p_hostName) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPLogin: {
+                p_hostName
+            }, callTimeout) {
+            [] smtp.getreply (SMTPLogin: {
+                    p_hostName
+                }
+                value true) {
+                setverdict (pass);
+                logged_in := true;
+            }
+            [] smtp.getreply {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (
+                SMTPLogin,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+
+    function f_sendSimpleMessageRecipient(
+        charstring p_senderId,
+        charstring p_recipient,
+        charstring p_messageMsg) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPSendSimpleMessageRecipient: {
+                p_senderId, p_recipient, p_messageMsg
+            }, callTimeout) {
+            [] smtp.getreply (SMTPSendSimpleMessageRecipient: {
+                    p_senderId, p_recipient, p_messageMsg
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPSendSimpleMessageRecipient,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+
+    function f_smtpHeader(in charstring p_sender, in StringArray p_receiver, in charstring p_subject, in StringArray p_cc, in charstring p_headerField, in charstring p_headerValue) runs on SMTPComponentType return charstring {
+        var SMTPException errorResponse;
+        var charstring header;
+        smtp.call (SMTPSimpleHeader: {p_sender, p_receiver,p_subject,p_cc,p_headerField, p_headerValue}, callTimeout) {
+            [] smtp.getreply (SMTPSimpleHeader: {p_sender, p_receiver,p_subject,p_cc,p_headerField, p_headerValue}) -> value header {
+                setverdict (pass);
+                return header;
+            }
+            [] smtp.catch (
+                SMTPSimpleHeader,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+        stop;
+    }
+    // send the message
+    function f_sendShortMessageData(charstring p_shortMessage) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPSendShortMessageData: {
+                p_shortMessage
+            }, callTimeout) {
+            [] smtp.getreply (SMTPSendShortMessageData: {
+                    p_shortMessage
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPSendShortMessageData,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+
+    function f_sendSimpleMessageRecipients(
+        charstring p_senderId,
+        charstring p_recipient,
+        charstring p_messageMsg) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPSendSimpleMessageRecipient: {
+                p_senderId, p_recipient, p_messageMsg
+            }, callTimeout) {
+            [] smtp.getreply (SMTPSendSimpleMessageRecipient: {
+                    p_senderId, p_recipient, p_messageMsg
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPSendSimpleMessageRecipient,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+    function f_SendSimpleMessageRecipients(
+        charstring p_senderId,
+        StringArray p_recipients,
+        charstring p_messageMsg) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPSendSimpleMessageRecipients: {
+                p_senderId, p_recipients, p_messageMsg
+            }, callTimeout) {
+            [] smtp.getreply (SMTPSendSimpleMessageRecipients: {
+                    p_senderId, p_recipients, p_messageMsg
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPSendSimpleMessageRecipients,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+    function f_logout() runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPLogout: {}, callTimeout) {
+            [] smtp.getreply (SMTPLogout: {}) {
+                setverdict (pass);
+                logged_in := false;
+            }
+            [] smtp.catch (
+                SMTPLogout,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+
+            }
+        }
+    }
+    function f_disconnect() runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (TCPDisconnect: {}, callTimeout) {
+            [] smtp.getreply (TCPDisconnect: {}) {
+                setverdict (pass);
+                connected := false;
+            }
+            // if error is received, then the verdict is set to fail
+            [] smtp.catch (
+                TCPDisconnect,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+            }
+
+            // if a timeout occurs the verdict is set to fail
+            [] smtp.catch (timeout) {
+                setverdict (fail);
+            }
+        }
+    }
+    function f_setSenderString(charstring p_senderId) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPSetSenderString: {
+                p_senderId
+            }, callTimeout) {
+            [] smtp.getreply (SMTPSetSenderString: {
+                    p_senderId
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPSetSenderString,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+    function f_addRecipientString(charstring p_recipient) runs on SMTPComponentType {
+        var SMTPException errorResponse;
+        smtp.call (SMTPAddRecipientString: {
+                p_recipient
+            }, callTimeout) {
+            [] smtp.getreply (SMTPAddRecipientString: {
+                    p_recipient
+                }) {
+                setverdict (pass);
+            }
+            [] smtp.catch (
+                SMTPAddRecipientString,
+                SMTPException: ?) -> value errorResponse {
+                setverdict (fail);
+                postamble();
+            }
+            [] smtp.catch (timeout) {
+                setverdict (inconc);
+                postamble();
+            }
+        }
+    }
+}
