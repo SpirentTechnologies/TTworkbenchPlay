@@ -23,6 +23,9 @@ Check out the results at
 https://github.com/TestingTechnologies/PlayITS
 
 
+Legal information
+-----------------
+
 (C) Copyright Testing Technologies, 2012-2013. All Rights Reserved.
 
 This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
