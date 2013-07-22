@@ -14,14 +14,14 @@ If you would like to join this Program please contact play[at]testingtech.com.
 University Courses
 ------------------
 
-FU-Berlin Winter Semester 2014 (17.02.2014 until 28.03.2014)
+Project (19517p) FU-Berlin Winter Semester 2014 (17.02.2014 until 28.03.2014)
 
-https://www.mi.fu-berlin.de/kvv/semester.htm
+http://www.fu-berlin.de/vv/de/lv/117717?m=159823&pc=63783&sm=69108
 
 Former Courses
 ------------------
 
-FU-Berlin Winter Semester 2013 (18.02.2013 until 29.03.2013)
+Project (19517p) FU-Berlin Winter Semester 2013 (18.02.2013 until 29.03.2013)
 
 https://www.mi.fu-berlin.de/kvv/course.htm?cid=10887&sid=26&iid=1
 
