@@ -14,7 +14,7 @@ If you would like to join this Program please contact play[at]testingtech.com.
 University Courses
 ------------------
 
-Project (19517p) FU-Berlin Winter Semester 2015 (16.02.2015 until 27.03.2015)
+Project (19308622) FU-Berlin Winter Semester 2015 (16.02.2015 until 27.03.2015)
 First meeting 20.10.2014 18:00, Room 046, Takustr. 9
 
 http://www.fu-berlin.de/vv/de/lv/176616?m=199259&pc=130142&sm=129212
